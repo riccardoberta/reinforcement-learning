@@ -2,7 +2,7 @@
 
 [Prof. Riccardo Berta](https://about.me/riccardo.berta)
 
-The course, offered within the context of the Master's Degree in [Electronic Engineering](https://corsi.unige.it/en/corsi/8732) at the [University of Genoa](https://unige.it/), focuses on the topic of creating autonomous agents capable of moving and interacting with an unknown environment in order to achieve a specific goal, using reinforcement learning algorithms.
+The [course](https://corsi.unige.it/en/off.f/2025/ins/90595), offered within the context of the Master's Degree in [Electronic Engineering](https://corsi.unige.it/en/corsi/11970) at the [University of Genoa](https://unige.it/), focuses on the topic of creating autonomous agents capable of moving and interacting with an unknown environment in order to achieve a specific goal, using reinforcement learning algorithms.
 
 ## Learning Outcomes
 
@@ -23,18 +23,19 @@ To effectively engage with the content of the course, it is necessary to have th
 
 The following list outlines the topics covered in the course:
 
-1. Introduction to autonomous agents and reinforcement learning
-2. Markov Decision Processes (MDPs)
+1. Agent Architectures 
+2. The Reinforcement Learning Problem
 3. Dynamic Programming
 4. Exploration vs Exploitation
 5. Policy Evaluation
 6. Policy Improvement
-7. Model-based methods
-8. Neural-fitted Q
-9. Value-based methods
-10. Policy-based methods
-11. Actor-Critic methods
-12. Advanced algorithms
+7. Model-based Methods
+8. Neural-fitted Q (NFQ)
+9. Deep Q-Networks (DQN)
+10. Policy Based and Actor-Critic Methods
+11. Deep Deterministic Policy Gradient (DDPG)
+12. Proximal Policy Optimization (PPO)
+13. Decision Transformers
 
 By accessing the GitHub repository, you will have access to the lecture materials, including slides and notebooks, to further explore and study the course topics.
 
