@@ -1,0 +1,180 @@
+--- CELL 0 [markdown] ---
+# 03 - Dynamic Programming — Paper & Pencil Exercises
+
+# Exercises — Dynamic Programming
+
+These paper-and-pencil exercises reinforce Chapter 03: the Bellman expectation and optimality equations, exact policy evaluation by solving a linear system, iterative policy evaluation as a fixed-point iteration, the policy-improvement theorem, value iteration, and how the discount factor can change the optimal policy. Notation follows the course convention ($R_{t+1}$, $p(s',r\mid s,a)$, lowercase = true value, uppercase = estimate).
+
+---
+
+
+--- CELL 1 [markdown] ---
+## Exercise 3.1 — Exact policy evaluation (solving the linear system)
+
+**Problem.** Consider the following MDP with two non-terminal states $S_1, S_2$ and one terminal state, evaluated under a fixed policy (one action per state), with **$\gamma = 1$**:
+
+- In $S_1$: the action leads **deterministically** to $S_2$ with reward $-1$.
+- In $S_2$: the action leads with probability $0.5$ to the **terminal** state with reward $+10$, and with probability $0.5$ back to $S_1$ with reward $-1$.
+
+Compute the exact state values $v_\pi(S_1)$ and $v_\pi(S_2)$ by writing and solving the Bellman expectation equations.
+
+
+--- CELL 2 [markdown] ---
+**Solution.**
+
+**Step 1 — Write the Bellman expectation equation** $v_\pi(s)=\sum_{s',r}p(s',r\mid s,\pi(s))\,[\,r+\gamma v_\pi(s')\,]$ for each state (with $\gamma=1$, and $v_\pi(\text{terminal})=0$):
+
+$$v_\pi(S_1) = 1\cdot\big[-1 + v_\pi(S_2)\big] = -1 + v_\pi(S_2),$$
+$$v_\pi(S_2) = 0.5\big[10 + 0\big] + 0.5\big[-1 + v_\pi(S_1)\big] = 4.5 + 0.5\,v_\pi(S_1).$$
+
+**Step 2 — Solve the $2\times2$ linear system.** Substitute the first equation into the second:
+
+$$v_\pi(S_2) = 4.5 + 0.5\,(-1 + v_\pi(S_2)) = 4.0 + 0.5\,v_\pi(S_2)
+\;\Rightarrow\; 0.5\,v_\pi(S_2) = 4.0 \;\Rightarrow\; v_\pi(S_2) = 8.$$
+
+Back-substitute: $\ v_\pi(S_1) = -1 + 8 = 7.$
+
+**Step 3 — Sanity check.** $v_\pi(S_2)=4.5+0.5(7)=8$ ✓ and $v_\pi(S_1)=-1+8=7$ ✓.
+
+$$\boxed{\,v_\pi(S_1)=7,\qquad v_\pi(S_2)=8\,}$$
+
+> **Key concept.** For a *fixed* policy the Bellman expectation equations form a **linear system** with a unique solution — value functions can be computed *exactly* when the MDP is small and known. Iterative methods (next exercise) approximate this same solution when a direct solve is impractical.
+
+
+--- CELL 3 [markdown] ---
+## Exercise 3.2 — Iterative policy evaluation
+
+**Problem.** For the **same MDP** as Exercise 3.1, run **iterative policy evaluation** starting from $V_0(S_1)=V_0(S_2)=0$, using **synchronous** sweeps
+
+$$V_{k+1}(s) \leftarrow \sum_{s',r} p(s',r\mid s,\pi(s))\,[\,r+\gamma V_k(s')\,].$$
+
+Perform four sweeps and comment on convergence toward the exact values $(7,8)$.
+
+
+--- CELL 4 [markdown] ---
+**Solution.**
+
+**Step 1 — Update equations** (from Ex. 3.1, with $\gamma=1$):
+
+$$V_{k+1}(S_1) = -1 + V_k(S_2), \qquad V_{k+1}(S_2) = 4.5 + 0.5\,V_k(S_1).$$
+
+**Step 2 — Iterate** from $V_0=(0,0)$ (each sweep uses only the *previous* estimates):
+
+| sweep $k$ | $V_k(S_1)$ | $V_k(S_2)$ |
+|---|---|---|
+| 0 | 0 | 0 |
+| 1 | $-1+0=-1.0$ | $4.5+0.5(0)=4.5$ |
+| 2 | $-1+4.5=3.5$ | $4.5+0.5(-1)=4.0$ |
+| 3 | $-1+4.0=3.0$ | $4.5+0.5(3.5)=6.25$ |
+| 4 | $-1+6.25=5.25$ | $4.5+0.5(3.0)=6.0$ |
+
+**Step 3 — Convergence.** The estimates march toward the fixed point $(7,8)$ found analytically in Exercise 3.1 (continuing the sweeps gives $(5.0, 7.125),\ (6.125, 7.0),\ (6.0, 7.5625),\dots \to (7,8)$). Each sweep is a contraction toward the true value function.
+
+> **Key concept.** Iterative policy evaluation is **bootstrapping**: it updates each state's estimate from the current estimates of its successors. It converges to the same $v_\pi$ that solves the linear system, without ever inverting a matrix — the practical route when the state set is large. The index $k$ counts *algorithm sweeps*, not environment time steps.
+
+
+--- CELL 5 [markdown] ---
+## Exercise 3.3 — Policy improvement by one greedy step
+
+**Problem.** In state $X$ two actions are available (both give reward $0$ on the transition), with $\gamma=0.9$:
+
+- $a_1$: leads deterministically to state $Y$, with known value $v_\pi(Y)=5$;
+- $a_2$: leads deterministically to state $Z$, with known value $v_\pi(Z)=8$.
+
+The current policy $\pi$ selects $a_1$ in $X$.
+
+1. Compute the action values $q_\pi(X,a_1)$ and $q_\pi(X,a_2)$.
+2. Apply the policy-improvement (greedy) step and verify it satisfies the policy-improvement theorem.
+
+
+--- CELL 6 [markdown] ---
+**Solution.**
+
+**Step 1 — Action values** via $q_\pi(X,a)=\sum_{s',r}p(s',r\mid X,a)\,[\,r+\gamma v_\pi(s')\,]$ (deterministic transitions, $r=0$):
+
+$$q_\pi(X,a_1) = 0 + 0.9\times 5 = 4.5, \qquad q_\pi(X,a_2) = 0 + 0.9\times 8 = 7.2.$$
+
+Under the current policy, $v_\pi(X)=q_\pi(X,a_1)=4.5$.
+
+**Step 2 — Greedy improvement.** $\ \pi'(X)=\arg\max_a q_\pi(X,a)=a_2$, since $7.2 > 4.5$.
+
+**Step 3 — Check the policy-improvement theorem.** The theorem states that if $q_\pi(s,\pi'(s))\ge v_\pi(s)$ for all $s$, then $v_{\pi'}\ge v_\pi$. Here
+
+$$q_\pi(X,\pi'(X)) = q_\pi(X,a_2) = 7.2 \;\ge\; v_\pi(X) = 4.5,$$
+
+so switching to $a_2$ is guaranteed **not to worsen** (here, to strictly improve) the policy.
+
+> **Key concept.** *Acting greedily with respect to the current value function* yields a policy that is at least as good — the engine behind policy iteration. One evaluation gives us $q_\pi$; one greedy step gives a better policy.
+
+
+--- CELL 7 [markdown] ---
+## Exercise 3.4 — Value iteration and policy extraction
+
+**Problem.** Consider states $A$, $B$ and a terminal goal $G$ (with $v(G)=0$), $\gamma=0.9$:
+
+- In $A$: action **right** → $B$ (reward $0$); action **stay** → $A$ (reward $0$).
+- In $B$: action **right** → $G$ (reward $+1$); action **left** → $A$ (reward $0$).
+
+Run **value iteration** from $V_0\equiv 0$,
+
+$$V_{k+1}(s)=\max_a \sum_{s',r}p(s',r\mid s,a)\,[\,r+\gamma V_k(s')\,],$$
+
+for three iterations, then extract the greedy optimal policy.
+
+
+--- CELL 8 [markdown] ---
+**Solution.**
+
+**Step 1 — Iterate.** With $V_0(A)=V_0(B)=0$:
+
+*Iteration 1:*
+$$V_1(A)=\max(\underbrace{0+0.9\cdot0}_{\text{right}},\ \underbrace{0.9\cdot0}_{\text{stay}})=0.0, \quad V_1(B)=\max(\underbrace{1+0.9\cdot0}_{\text{right}},\ \underbrace{0.9\cdot0}_{\text{left}})=1.0.$$
+
+*Iteration 2:*
+$$V_2(A)=\max(0+0.9\cdot1,\ 0.9\cdot0)=0.9, \quad V_2(B)=\max(1+0,\ 0.9\cdot0)=1.0.$$
+
+*Iteration 3:*
+$$V_3(A)=\max(0.9\cdot1,\ 0.9\cdot0.9)=0.9, \quad V_3(B)=\max(1,\ 0.9\cdot0.9)=1.0.$$
+
+The values have converged: $\ v_*(A)=0.9,\ v_*(B)=1.$
+
+**Step 2 — Extract the greedy policy.** $\pi_*(s)=\arg\max_a\sum p\,[r+\gamma v_*(s')]$:
+
+- $A$: right gives $0.9\cdot1=0.9$ vs. stay $0.9\cdot0.9=0.81$ → **right**.
+- $B$: right gives $1$ vs. left $0.9\cdot0.9=0.81$ → **right**.
+
+So $\pi_*: A\to\text{right},\ B\to\text{right}$ (go $A\to B\to G$).
+
+> **Key concept.** Value iteration merges evaluation and improvement into a single $\max$-update — "greedily greedifying" every sweep. The policy is extracted only *once*, at the end, by taking the argmax of the one-step lookahead.
+
+
+--- CELL 9 [markdown] ---
+## Exercise 3.5 — How the discount factor changes the optimal action
+
+**Problem.** From a start state the agent chooses once between two actions (each then leads to termination):
+
+- **SOONER:** reward $+1$ at the next step ($R_{t+1}=1$), then terminal.
+- **LATER:** reward $0$ at the next step and $+2$ the step after ($R_{t+1}=0,\ R_{t+2}=2$), then terminal.
+
+Find the value of the discount factor $\gamma$ at which the agent is indifferent, and state which action is optimal above and below that threshold.
+
+
+--- CELL 10 [markdown] ---
+**Solution.**
+
+**Step 1 — Value of each action** (from the return $G_t=\sum_k \gamma^k R_{t+k+1}$):
+
+$$v(\text{SOONER}) = \gamma^0\cdot 1 = 1, \qquad v(\text{LATER}) = \gamma^0\cdot 0 + \gamma^1\cdot 2 = 2\gamma.$$
+
+**Step 2 — Indifference point.** Set them equal:
+
+$$1 = 2\gamma \;\Rightarrow\; \gamma = \tfrac12.$$
+
+**Step 3 — Compare on each side of the threshold.**
+
+- If $\gamma < \tfrac12$: $\ 2\gamma < 1$, so **SOONER** is optimal (a discounted future $+2$ is worth less than an immediate $+1$).
+- If $\gamma > \tfrac12$: $\ 2\gamma > 1$, so **LATER** is optimal (patience pays).
+- At $\gamma=\tfrac12$: both give value $1$ — the agent is indifferent.
+
+> **Key concept.** The optimal policy is **not intrinsic to the rewards alone** — it depends on $\gamma$. Discounting encodes how the agent trades immediate against delayed reward, and changing it can flip which action is best. (This mirrors the chapter's remark that discounting can favour faster-but-riskier policies.)
+
