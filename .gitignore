@@ -3,3 +3,7 @@ recordings/
 data/
 WIP/
 
+
+# large RL training artefacts
+temp/*_replay.npy
+temp/*_last.pt
