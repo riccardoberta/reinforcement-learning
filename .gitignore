@@ -5,5 +5,7 @@ WIP/
 
 
 # large RL training artefacts
-temp/*_replay.npy
-temp/*_last.pt
+**/temp/*_replay.npy
+**/temp/*_last.pt
+**/temp/*_checkpoint.pt
+**/temp/claude/
